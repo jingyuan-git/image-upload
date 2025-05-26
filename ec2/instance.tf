@@ -4,7 +4,7 @@ resource "aws_instance" "web" {
   key_name               = var.key_name
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.vpc_security_group_ids
-  iam_instance_profile   = var.iam_instance_profile
+  # iam_instance_profile   = var.iam_instance_profile
   tags                   = { Name = "Image-Upload-Web" }
 
   user_data = templatefile("${path.module}/user_data.sh", {
