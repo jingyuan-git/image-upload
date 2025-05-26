@@ -48,3 +48,11 @@ resource "aws_lambda_permission" "allow_s3" {
   principal     = "s3.amazonaws.com"
   source_arn    = var.s3_bucket_arn
 }
+
+output "lambda_arn" {
+  value = aws_lambda_function.annotation.arn
+}
+
+output "lambda_permission" {
+  value = aws_lambda_permission.allow_s3.id
+}

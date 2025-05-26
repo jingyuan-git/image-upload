@@ -2,9 +2,9 @@ resource "aws_instance" "web" {
   ami                    = "ami-0953476d60561c955"
 instance_type          = var.instance_type
   key_name               = var.key_name
-  subnet_id              = aws_subnet.main.id
+  subnet_id              = var.subnet_id
   vpc_security_group_ids = var.vpc_security_group_ids
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile   = var.iam_instance_profile
   tags                   = { Name = "Image-Upload-Web" }
 
   user_data = <<-EOF
