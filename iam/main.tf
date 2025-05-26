@@ -4,8 +4,8 @@
 #   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
 # }
 
-resource "aws_iam_instance_profile" "this" {
-  name = "EC2InstanceProfile"
-  role = aws_iam_role.this.name
-}
+# resource "aws_iam_instance_profile" "this" {
+#   name = "EC2InstanceProfile"
+#   role = aws_iam_role.this.name
+# }
 
