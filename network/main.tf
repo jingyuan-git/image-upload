@@ -9,14 +9,26 @@ resource "aws_subnet" "private_subnet_web" {
   }
 }
 
-resource "aws_subnet" "private_subnet_rds" {
+resource "aws_subnet" "private_subnet_rds_az1" {
   vpc_id                  = var.work_vpc_id
-  cidr_block              = var.private_subnet_rds_cidr
-  availability_zone       = var.availability_zone
+  cidr_block              = var.private_subnet_rds_cidr_az1
+  availability_zone       = var.availability_zone_1
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "Private Subnet for RDS"
+    Name = "Private Subnet for RDS in AZ1"
+  }
+}
+
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "rds-subnet-group"
+  subnet_ids = [
+    aws_subnet.private_subnet_rds_az1.id,
+    aws_subnet.private_subnet_rds_az2.id
+  ]
+
+  tags = {
+    Name = "RDS Subnet Group"
   }
 }
 
