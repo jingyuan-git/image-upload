@@ -16,11 +16,11 @@ resource "aws_db_instance" "image_caption_db" {
   }
 }
 
-resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "rds-subnet-group"
-  subnet_ids = var.subnet_ids
+# resource "aws_db_subnet_group" "rds_subnet_group" {
+#   name       = "rds-subnet-group"
+#   subnet_ids = var.subnet_ids
 
-  tags = {
-    Name = "RDS Subnet Group"
-  }
-}
+#   tags = {
+#     Name = "RDS Subnet Group"
+#   }
+# }
