@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-}
-
 # S3 Bucket
 module "s3_bucket" {
   source = "./s3"
