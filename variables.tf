@@ -25,11 +25,13 @@ variable "work_vpc_id" {
 variable "db_user" {
   description = "The username for the RDS database"
   type        = string
+  default = "root"
 }
 
 variable "db_password" {
   description = "The password for the RDS database"
   type        = string
+  default = "password123"
 }
 
 # variable "subnet_id" {

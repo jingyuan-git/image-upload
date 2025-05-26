@@ -1,11 +1,22 @@
-resource "aws_subnet" "private_subnet" {
+resource "aws_subnet" "private_subnet_web" {
   vpc_id                  = var.work_vpc_id
-  cidr_block              = var.private_subnet_cidr
+  cidr_block              = var.private_subnet_web_cidr
   availability_zone       = var.availability_zone
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "Private Subnet"
+    Name = "Private Subnet for Web Application"
+  }
+}
+
+resource "aws_subnet" "private_subnet_rds" {
+  vpc_id                  = var.work_vpc_id
+  cidr_block              = var.private_subnet_rds_cidr
+  availability_zone       = var.availability_zone
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "Private Subnet for RDS"
   }
 }
 

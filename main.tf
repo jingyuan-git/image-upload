@@ -19,7 +19,7 @@ module "rds" {
   db_user                = var.db_user
   db_password            = var.db_password
   vpc_security_group_ids = [module.network.security_group_id]
-  subnet_ids             = module.network.subnet_ids
+  subnet_ids             = [module.network.private_subnet_rds_id]
   db_subnet_group_name   = module.network.db_subnet_group_name
 }
 
@@ -28,7 +28,7 @@ module "ec2" {
   source                = "./ec2"
   instance_type         = var.instance_type
   key_name              = var.key_name
-  subnet_id             = module.network.subnet_id
+  subnet_id             = module.network.private_subnet_web_id
   vpc_security_group_ids = [module.network.security_group_id]
   iam_instance_profile  = module.iam.instance_profile_name
 
