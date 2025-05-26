@@ -1,33 +1,18 @@
 resource "aws_instance" "web" {
   ami                    = "ami-0953476d60561c955"
-instance_type          = var.instance_type
+  instance_type          = var.instance_type
   key_name               = var.key_name
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.vpc_security_group_ids
   iam_instance_profile   = var.iam_instance_profile
   tags                   = { Name = "Image-Upload-Web" }
 
-  user_data = <<-EOF
-    #!/bin/bash
-    yum update -y
-    yum install python3-pip -y
-    pip3 install flask mysql-connector-python google-generativeai boto3 werkzeug
-    yum install -y mariadb105
-
-    # 写入你的 Flask 应用代码到 /home/ec2-user/app.py
-    cat > /home/ec2-user/app.py << 'EOPY'
-${replace(file("${path.module}/app.py"), "$", "\\$")}
-EOPY
-
-    # 可选：设置环境变量（推荐用安全方式管理敏感信息）
-    export GOOGLE_API_KEY="你的Gemini_API_Key"
-    export S3_BUCKET="你的S3桶名"
-    export DB_HOST="你的RDS地址"
-    export DB_USER="你的RDS用户名"
-    export DB_PASSWORD="你的RDS密码"
-
-    # 启动 Flask 应用（后台运行）
-    cd /home/ec2-user
-    nohup python3 app.py > flask.log 2>&1 &
-  EOF
+  user_data = templatefile("${path.module}/user_data.sh", {
+    google_api_key = var.google_api_key
+    s3_bucket      = var.s3_bucket
+    db_host        = var.db_host
+    db_user        = var.db_user
+    db_password    = var.db_password
+    app_code       = replace(file("${path.module}/app.py"), "$", "\\$")
+  })
 }

@@ -23,3 +23,29 @@ variable "iam_instance_profile" {
   type        = string
 }
 
+
+variable "google_api_key" {
+  description = "Gemini API Key"
+  type        = string
+  default = "AIzaSyBreDUikiNxFrH1Qnb0z7bvn4GOoRveYeE"
+}
+
+variable "s3_bucket" {
+  description = "S3 bucket name"
+  type        = string
+}
+
+variable "db_host" {
+  description = "RDS endpoint"
+  type        = string
+}
+
+variable "db_user" {
+  description = "RDS username"
+  type        = string
+}
+
+variable "db_password" {
+  description = "RDS password"
+  type        = string
+}

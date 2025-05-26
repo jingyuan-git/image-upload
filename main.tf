@@ -14,14 +14,29 @@ module "network" {
   work_vpc_id = var.work_vpc_id
 }
 
+module "rds" {
+  source                 = "./rds"
+  db_user                = var.db_user
+  db_password            = var.db_password
+  vpc_security_group_ids = [module.network.security_group_id]
+  subnet_ids             = module.network.subnet_ids
+  db_subnet_group_name   = module.network.db_subnet_group_name
+}
+
 # EC2 Instance
 module "ec2" {
-  source = "./ec2"
-  instance_type          = var.instance_type
-  key_name               = var.key_name
-  subnet_id              = module.network.subnet_id
+  source                = "./ec2"
+  instance_type         = var.instance_type
+  key_name              = var.key_name
+  subnet_id             = module.network.subnet_id
   vpc_security_group_ids = [module.network.security_group_id]
-  iam_instance_profile   = module.iam.instance_profile_name
+  iam_instance_profile  = module.iam.instance_profile_name
+
+  # google_api_key = var.google_api_key
+  s3_bucket      = module.s3_bucket.bucket_name
+  db_host        = module.rds.rds_endpoint
+  db_user        = var.db_user
+  db_password    = var.db_password
 }
 
 # Lambda: Annotation
