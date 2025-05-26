@@ -19,3 +19,8 @@ resource "aws_iam_role_policy_attachment" "ec2_full_access" {
   role       = data.aws_iam_role.existing_ec2_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
 }
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "EC2InstanceProfile"
+  role = data.aws_iam_role.existing_ec2_role.name
+}
