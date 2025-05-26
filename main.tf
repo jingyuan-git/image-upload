@@ -14,15 +14,15 @@ module "network" {
   work_vpc_id = var.work_vpc_id
 }
 
-# EC2 Instance
-module "ec2" {
-  source = "./ec2"
-  instance_type          = var.instance_type
-  key_name               = var.key_name
-  subnet_id              = module.network.subnet_id
-  vpc_security_group_ids = [module.network.security_group_id]
-  iam_instance_profile   = module.iam.instance_profile_name
-}
+# # EC2 Instance
+# module "ec2" {
+#   source = "./ec2"
+#   instance_type          = var.instance_type
+#   key_name               = var.key_name
+#   subnet_id              = module.network.subnet_id
+#   vpc_security_group_ids = [module.network.security_group_id]
+#   iam_instance_profile   = module.iam.instance_profile_name
+# }
 
 # Lambda: Annotation
 module "lambda_annotation" {
