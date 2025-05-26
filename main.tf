@@ -30,7 +30,7 @@ module "ec2" {
   key_name              = var.key_name
   subnet_id             = module.network.private_subnet_web_id
   vpc_security_group_ids = [module.network.security_group_id]
-  iam_instance_profile  = "EC2InstanceProfile"
+  iam_instance_profile  = "EC2InstanceRole"
 
   # google_api_key = var.google_api_key
   s3_bucket      = module.s3_bucket.bucket_name
