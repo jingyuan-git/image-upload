@@ -3,10 +3,6 @@ output "private_subnet_web_id" {
   value       = aws_subnet.private_subnet_web.id
 }
 
-output "private_subnet_rds_id" {
-  description = "The ID of the private subnet for RDS"
-  value       = aws_subnet.private_subnet_rds.id
-}
 
 output "security_group_id" {
   description = "The ID of the web security group"
