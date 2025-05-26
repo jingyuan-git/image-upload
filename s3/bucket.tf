@@ -15,7 +15,29 @@ resource "aws_s3_bucket" "image_upload" {
 }
 
 
-resource "aws_s3_bucket_acl" "image_upload_acl" {
-  bucket = aws_s3_bucket.image_upload.id
-  acl    = "private"
-}
+# resource "aws_s3_bucket_acl" "image_upload_acl" {
+#   bucket = aws_s3_bucket.image_upload.id
+#   acl    = "private"
+# }
+
+# resource "aws_s3_bucket_policy" "private_access" {
+#   bucket = aws_s3_bucket.image_upload.id
+
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Sid       = "DenyPublicReadWrite",
+#         Effect    = "Deny",
+#         Principal = "*",
+#         Action    = ["s3:GetObject", "s3:PutObject"],
+#         Resource  = "${aws_s3_bucket.image_upload.arn}/*",
+#         Condition = {
+#           Bool = {
+#             "aws:SecureTransport" : "false"
+#           }
+#         }
+#       }
+#     ]
+#   })
+# }
