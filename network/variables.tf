@@ -12,13 +12,13 @@ variable "private_subnet_web_cidr" {
 variable "private_subnet_rds_cidr_az1" {
   description = "CIDR block for the private subnet used by RDS in AZ1"
   type        = string
-  default     = "10.0.2.0/24"
+  default     = "10.0.12.0/24"
 }
 
 variable "private_subnet_rds_cidr_az2" {
   description = "CIDR block for the private subnet used by RDS in AZ2"
   type        = string
-  default     = "10.0.3.0/24"
+  default     = "10.0.13.0/24"
 }
 
 variable "availability_zone_1" {
