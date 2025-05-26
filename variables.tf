@@ -19,6 +19,7 @@ variable "key_name" {
 variable "work_vpc_id" {
   description = "Work VPC ID"
   type        = string
+  default = "vpc-0ffaab53cbf6939e8"
 }
 
 
