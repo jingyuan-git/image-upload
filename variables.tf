@@ -19,7 +19,7 @@ variable "key_name" {
 variable "work_vpc_id" {
   description = "Work VPC ID"
   type        = string
-  default = "vpc-0ffaab53cbf6939e8"
+  default = "vpc-0bf8c2b7c832a6fb9"
 }
 
 variable "db_user" {
