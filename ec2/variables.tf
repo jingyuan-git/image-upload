@@ -23,8 +23,3 @@ variable "iam_instance_profile" {
   type        = string
 }
 
-variable "subnet_id" {
-  description = "Subnet ID"
-  type        = string
-}
-
