@@ -20,6 +20,15 @@ resource "aws_subnet" "private_subnet_rds" {
   }
 }
 
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "rds-subnet-group"
+  subnet_ids = [aws_subnet.private_subnet_rds.id]
+
+  tags = {
+    Name = "RDS Subnet Group"
+  }
+}
+
 resource "aws_security_group" "web_sg" {
   name        = "web-sg"
   description = "Allow SSH and HTTP"

@@ -19,6 +19,6 @@ variable "subnet_ids" {
 }
 
 variable "db_subnet_group_name" {
-  description = "The name of the DB subnet group"
+  description = "Name of the RDS subnet group"
   type        = string
 }
