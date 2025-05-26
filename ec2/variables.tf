@@ -13,10 +13,10 @@ variable "subnet_id" {
   type        = string
 }
 
-# variable "vpc_security_group_ids" {
-#   description = "List of security group IDs"
-#   type        = list(string)
-# }
+variable "vpc_security_group_ids" {
+  description = "List of security group IDs"
+  type        = list(string)
+}
 
 variable "iam_instance_profile" {
   description = "IAM instance profile name"

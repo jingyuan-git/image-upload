@@ -52,7 +52,7 @@ resource "aws_lambda_permission" "allow_s3" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.thumbnail.function_name
   principal     = "s3.amazonaws.com"
-  # source_arn 可以在主模块里用
+  source_arn    = var.s3_bucket_arn
 }
 
 output "lambda_arn" {
