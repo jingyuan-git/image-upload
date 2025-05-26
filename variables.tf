@@ -16,10 +16,16 @@ variable "key_name" {
   default     = "vockey"
 }
 
-variable "subnet_id" {
-  description = "Subnet ID"
+variable "work_vpc_id" {
+  description = "Work VPC ID"
   type        = string
 }
+
+
+# variable "subnet_id" {
+#   description = "Subnet ID"
+#   type        = string
+# }
 
 variable "vpc_security_group_ids" {
   description = "List of security group IDs"

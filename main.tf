@@ -11,6 +11,7 @@ module "iam" {
 # Network (VPC, Subnet, Security Group)
 module "network" {
   source = "./network"
+  work_vpc_id = var.work_vpc_id
 }
 
 # EC2 Instance
