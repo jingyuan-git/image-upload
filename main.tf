@@ -28,14 +28,14 @@ module "network" {
 module "lambda_annotation" {
   source = "./lambda/annotation"
   s3_bucket = module.s3_bucket.bucket_name
-  # 其他变量
+  s3_bucket_arn = module.s3_bucket.bucket_arn
 }
 
 # Lambda: Thumbnail
 module "lambda_thumbnail" {
   source = "./lambda/thumbnail"
   s3_bucket = module.s3_bucket.bucket_name
-  # 其他变量
+  s3_bucket_arn = module.s3_bucket.bucket_arn
 }
 
 # S3 Bucket Notification for Lambda triggers
