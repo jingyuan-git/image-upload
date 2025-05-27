@@ -57,17 +57,17 @@ resource "aws_s3_bucket_notification" "image_upload_notification" {
   bucket = module.s3_bucket.bucket_id
 
   lambda_function {
-    lambda_function_arn = aws_lambda_function.annotation.arn
+    lambda_function_arn = module.lambda_annotation.lambda_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "images/annotations/"
     filter_suffix       = ".jpg"
   }
 
   lambda_function {
-    lambda_function_arn = aws_lambda_function.thumbnail.arn
+    lambda_function_arn = module.lambda_thumbnail.lambda_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "images/thumbnails/"
-    filter_suffix       = ".png"
+    filter_suffix       = ".jpg"
   }
 
   depends_on = [
