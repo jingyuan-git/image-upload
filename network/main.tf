@@ -76,11 +76,37 @@ resource "aws_subnet" "private_subnet_rds_az2" {
   }
 }
 
+# 查找现有的工作公共子网
+data "aws_subnet" "work_public_subnet" {
+  filter {
+    name   = "tag:Name"
+    values = ["Work Public Subnet"]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [var.work_vpc_id]
+  }
+}
+
+# 检查是否存在第二个公共子网
+data "aws_subnets" "existing_public_az2_subnet" {
+  filter {
+    name   = "cidr-block"
+    values = ["10.0.4.0/24"]  # 根据你的实际 CIDR 调整
+  }
+  filter {
+    name   = "vpc-id"
+    values = [var.work_vpc_id]
+  }
+}
+
+
 # Local 变量用于统一引用子网 ID
 locals {
   private_subnet_web_id     = length(data.aws_subnets.existing_web_subnet.ids) > 0 ? data.aws_subnets.existing_web_subnet.ids[0] : aws_subnet.private_subnet_web[0].id
   private_subnet_rds_az1_id = length(data.aws_subnets.existing_rds_az1_subnet.ids) > 0 ? data.aws_subnets.existing_rds_az1_subnet.ids[0] : aws_subnet.private_subnet_rds_az1[0].id
   private_subnet_rds_az2_id = length(data.aws_subnets.existing_rds_az2_subnet.ids) > 0 ? data.aws_subnets.existing_rds_az2_subnet.ids[0] : aws_subnet.private_subnet_rds_az2[0].id
+  public_subnet_az2_id = length(data.aws_subnets.existing_public_az2_subnet.ids) > 0 ? data.aws_subnets.existing_public_az2_subnet.ids[0] : aws_subnet.public_subnet_az2[0].id
 }
 
 # RDS 子网组（使用 local 变量）
@@ -163,30 +189,6 @@ resource "aws_route_table" "private_route_table" {
 resource "aws_route_table_association" "private_subnet_association" {
   subnet_id      = local.private_subnet_web_id
   route_table_id = aws_route_table.private_route_table.id
-}
-
-# 查找现有的工作公共子网
-data "aws_subnet" "work_public_subnet" {
-  filter {
-    name   = "tag:Name"
-    values = ["Work Public Subnet"]
-  }
-  filter {
-    name   = "vpc-id"
-    values = [var.work_vpc_id]
-  }
-}
-
-# 检查是否存在第二个公共子网
-data "aws_subnets" "existing_public_az2_subnet" {
-  filter {
-    name   = "cidr-block"
-    values = ["10.0.4.0/24"]  # 根据你的实际 CIDR 调整
-  }
-  filter {
-    name   = "vpc-id"
-    values = [var.work_vpc_id]
-  }
 }
 
 # 条件创建：第二个公共子网
