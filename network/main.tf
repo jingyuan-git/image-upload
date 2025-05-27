@@ -1,3 +1,14 @@
+data "aws_subnet" "work_public_subnet" {
+  filter {
+    name   = "tag:Name"
+    values = ["Work Public Subnet"]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [var.work_vpc_id]
+  }
+}
+
 resource "aws_subnet" "public_subnet_az2" {
   vpc_id                  = var.work_vpc_id
   cidr_block              = "10.0.4.0/24"  # 确保不与现有子网冲突
@@ -94,7 +105,7 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.private_subnet_web.id
+  subnet_id     = aws_subnet.work_public_subnet.id
   tags = {
     Name = "NAT Gateway"
   }
@@ -116,17 +127,6 @@ resource "aws_route_table" "private_route_table" {
 resource "aws_route_table_association" "private_subnet_association" {
   subnet_id      = aws_subnet.private_subnet_web.id
   route_table_id = aws_route_table.private_route_table.id
-}
-
-data "aws_subnet" "work_public_subnet" {
-  filter {
-    name   = "tag:Name"
-    values = ["Work Public Subnet"]
-  }
-  filter {
-    name   = "vpc-id"
-    values = [var.work_vpc_id]
-  }
 }
 
 resource "aws_lb" "this" {
