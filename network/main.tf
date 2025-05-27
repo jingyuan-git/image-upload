@@ -73,3 +73,39 @@ resource "aws_security_group" "web_sg" {
     Name = "Web SG"
   }
 }
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public_subnet.id
+
+  tags = {
+    Name = "NAT Gateway"
+  }
+}
+
+resource "aws_eip" "nat" {
+  associate_with_private_ip = null # 如果需要绑定到特定的私有 IP，可以在这里指定
+  depends_on                = [aws_nat_gateway.nat] # 确保 NAT Gateway 创建后再分配 EIP
+
+  tags = {
+    Name = "NAT Gateway EIP"
+  }
+}
+
+resource "aws_route_table" "private_route_table" {
+  vpc_id = var.work_vpc_id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = {
+    Name = "Private Route Table"
+  }
+}
+
+resource "aws_route_table_association" "private_subnet_association" {
+  subnet_id      = aws_subnet.private_subnet_web.id
+  route_table_id = aws_route_table.private_route_table.id
+}

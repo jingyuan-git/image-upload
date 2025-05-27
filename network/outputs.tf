@@ -21,3 +21,8 @@ output "private_subnet_rds_ids" {
     aws_subnet.private_subnet_rds_az2.id
   ]
 }
+
+output "nat_gateway_id" {
+  description = "The ID of the NAT Gateway"
+  value       = aws_nat_gateway.nat.id
+}

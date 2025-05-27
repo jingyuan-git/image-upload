@@ -1,2 +1,2 @@
 key_name = ""
-work_vpc_id = "vpc-064925ea47ddcade5"
+work_vpc_id = "vpc-08557e09d23de835d"
