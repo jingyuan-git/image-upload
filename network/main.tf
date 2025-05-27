@@ -106,3 +106,35 @@ resource "aws_route_table_association" "private_subnet_association" {
   subnet_id      = aws_subnet.private_subnet_web.id
   route_table_id = aws_route_table.private_route_table.id
 }
+
+resource "aws_lb" "this" {
+  name               = "image-upload-alb"
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = [
+    aws_subnet.public_subnet.id,
+    aws_subnet.public_subnet_az2.id
+  ]
+  security_groups    = [aws_security_group.web_sg.id]
+
+  tags = {
+    Name = "Image Upload ALB"
+  }
+}
+
+resource "aws_lb_target_group" "web" {
+  name     = "web-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = var.work_vpc_id
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.this.arn
+  port              = 80
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.web.arn
+  }
+}
