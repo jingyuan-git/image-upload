@@ -3,17 +3,6 @@ variable "work_vpc_id" {
   type        = string
 }
 
-resource "aws_subnet" "public_subnet_az2" {
-  vpc_id                  = var.work_vpc_id
-  cidr_block              = "10.0.4.0/24"  # 确保不与现有子网冲突
-  availability_zone       = var.availability_zone_2  # 不同的可用区
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Public Subnet AZ2"
-  }
-}
-
 variable "private_subnet_web_cidr" {
   description = "CIDR block for the private subnet used by Web Application"
   type        = string
