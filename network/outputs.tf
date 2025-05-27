@@ -1,6 +1,6 @@
 output "private_subnet_web_id" {
   description = "The ID of the private subnet for Web Application"
-  value       = aws_subnet.private_subnet_web[0].id
+  value       = aws_subnet.private_subnet_web.id
 }
 
 
@@ -17,8 +17,8 @@ output "db_subnet_group_name" {
 output "private_subnet_rds_ids" {
   description = "The IDs of the private subnets for RDS"
   value       = [
-    aws_subnet.private_subnet_rds_az1[0].id,
-    aws_subnet.private_subnet_rds_az2[0].id
+    aws_subnet.private_subnet_rds_az1.id,
+    aws_subnet.private_subnet_rds_az2.id
   ]
 }
 
