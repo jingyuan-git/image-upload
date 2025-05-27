@@ -105,7 +105,7 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.work_public_subnet.id
+  subnet_id     = data.aws_subnet.work_public_subnet.id
   tags = {
     Name = "NAT Gateway"
   }
