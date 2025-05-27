@@ -74,18 +74,16 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public_subnet.id
-
+resource "aws_eip" "nat" {
+  domain = "vpc"
   tags = {
-    Name = "NAT Gateway"
+    Name = "NAT Gateway EIP"
   }
 }
 
 resource "aws_eip" "nat" {
   associate_with_private_ip = null # 如果需要绑定到特定的私有 IP，可以在这里指定
-  depends_on                = [aws_nat_gateway.nat] # 确保 NAT Gateway 创建后再分配 EIP
+  # depends_on                = [aws_nat_gateway.nat] # 确保 NAT Gateway 创建后再分配 EIP
 
   tags = {
     Name = "NAT Gateway EIP"
