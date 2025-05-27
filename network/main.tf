@@ -205,11 +205,6 @@ resource "aws_subnet" "public_subnet_az2" {
   }
 }
 
-# Local 变量用于第二个公共子网
-locals {
-  public_subnet_az2_id = length(data.aws_subnets.existing_public_az2_subnet.ids) > 0 ? data.aws_subnets.existing_public_az2_subnet.ids[0] : aws_subnet.public_subnet_az2[0].id
-}
-
 # ALB（使用 local 变量）
 resource "aws_lb" "this" {
   name               = "image-upload-alb"
