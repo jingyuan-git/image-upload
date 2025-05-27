@@ -10,6 +10,10 @@ variable "environment" {
   default     = "dev"
 }
 
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 resource "aws_s3_bucket" "image_upload" {
   bucket = "image-upload-${random_id.suffix.hex}"
 }
