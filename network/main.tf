@@ -107,12 +107,23 @@ resource "aws_route_table_association" "private_subnet_association" {
   route_table_id = aws_route_table.private_route_table.id
 }
 
+data "aws_subnet" "work_public_subnet" {
+  filter {
+    name   = "tag:Name"
+    values = ["Work Public Subnet"]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [var.work_vpc_id]
+  }
+}
+
 resource "aws_lb" "this" {
   name               = "image-upload-alb"
   internal           = false
   load_balancer_type = "application"
   subnets            = [
-    aws_subnet.public_subnet.id,
+    data.aws_subnet.work_public_subnet.id,
     aws_subnet.public_subnet_az2.id
   ]
   security_groups    = [aws_security_group.web_sg.id]
