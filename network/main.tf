@@ -1,3 +1,14 @@
+resource "aws_subnet" "public_subnet_az2" {
+  vpc_id                  = var.work_vpc_id
+  cidr_block              = "10.0.4.0/24"  # 确保不与现有子网冲突
+  availability_zone       = var.availability_zone_2  # 不同的可用区
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "Public Subnet AZ2"
+  }
+}
+
 resource "aws_subnet" "private_subnet_web" {
   vpc_id                  = var.work_vpc_id
   cidr_block              = var.private_subnet_web_cidr
