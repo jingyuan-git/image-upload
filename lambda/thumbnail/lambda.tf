@@ -14,28 +14,15 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/thumbnail_lambda.zip"
 }
 
-resource "aws_iam_role" "lambda_exec" {
-  name = "lambda_thumbnail_exec_role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = { Service = "lambda.amazonaws.com" }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_s3_access" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+data "aws_iam_role" "existing_lambda_role" {
+  name = "LabRole" # 替换为已有角色的名称
 }
 
 resource "aws_lambda_function" "thumbnail" {
   function_name    = "thumbnail-generator"
   handler          = "main.lambda_handler"
   runtime          = "python3.12"
-  role             = aws_iam_role.lambda_exec.arn
+  role             = data.aws_iam_role.existing_lambda_role.arn
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
   timeout          = 30
