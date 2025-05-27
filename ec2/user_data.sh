@@ -1,8 +1,8 @@
 #!/bin/bash
-yum update -y
-yum install python3-pip -y
-pip3 install flask mysql-connector-python google-generativeai boto3 werkzeug
-yum install -y mariadb105
+sudo yum update -y
+sudo yum install python3-pip -y
+sudo pip3 install flask mysql-connector-python google-generativeai boto3 werkzeug
+sudo yum install -y mariadb105
 
 # 写入你的 Flask 应用代码到 /home/ec2-user/app.py
 cat > /home/ec2-user/app.py << 'EOPY'
