@@ -11,7 +11,7 @@ variable "environment" {
 }
 
 resource "aws_s3_bucket" "image_upload" {
-  bucket = "image-upload-bucket-${var.aws_region}-${var.environment}"
+  bucket = "image-upload-${random_id.suffix.hex}"
 }
 
 
