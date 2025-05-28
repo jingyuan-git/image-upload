@@ -34,7 +34,7 @@ resource "aws_instance" "web" {
     db_host        = var.db_host
     db_user        = var.db_user
     db_password    = var.db_password
-    app_code       = replace(file("${path.module}/app.py"), "$", "\\$")
+    app_code       = replace(local_file.app_py.content, "$", "\\$")
   })
 }
 
