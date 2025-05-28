@@ -39,7 +39,7 @@ resource "aws_instance" "web" {
 }
 
 resource "aws_lb_target_group_attachment" "web" {
-  target_group_arn = module.alb_target_group.web_target_group_arn
+  target_group_arn = var.target_group_arn
   target_id        = aws_instance.web.id
   port             = 80
 }
