@@ -8,10 +8,18 @@ module "iam" {
   source = "./iam"
 }
 
+# 查找现有的 Work VPC
+data "aws_vpc" "work_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["Work VPC"]  # 替换为你的 VPC 实际名称
+  }
+}
+
 # Network (VPC, Subnet, Security Group)
 module "network" {
   source = "./network"
-  work_vpc_id = var.work_vpc_id
+  work_vpc_id = data.aws_vpc.work_vpc.id
 }
 
 module "rds" {
