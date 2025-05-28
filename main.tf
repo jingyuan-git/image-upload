@@ -44,6 +44,7 @@ module "ec2" {
   db_host        = regex("(.*):\\d+$", module.rds.rds_endpoint)[0]
   db_user        = var.db_user
   db_password    = var.db_password
+  target_group_arn = module.network.web_target_group_arn
 }
 
 # Lambda: Annotation

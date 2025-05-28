@@ -49,3 +49,8 @@ variable "db_password" {
   description = "RDS password"
   type        = string
 }
+
+variable "target_group_arn" {
+  description = "Target group ARN for the EC2 instance"
+  type        = string
+}

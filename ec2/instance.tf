@@ -2,9 +2,9 @@ resource "local_file" "app_py" {
   filename = "${path.module}/app.py"
   content  = templatefile("${path.module}/app.py.tpl", {
     google_api_key = var.google_api_key,
-    s3_bucket      = module.s3_bucket.bucket_name,
+    s3_bucket      = var.s3_bucket,
     s3_region      = "us-east-1",
-    db_host        = module.rds.rds_endpoint,
+    db_host        = var.db_host,
     db_name        = "image_caption_db",
     db_user        = var.db_user,
     db_password    = var.db_password
