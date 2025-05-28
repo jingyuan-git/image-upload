@@ -27,7 +27,6 @@ variable "iam_instance_profile" {
 variable "google_api_key" {
   description = "Gemini API Key"
   type        = string
-  default = "AIzaSyBreDUikiNxFrH1Qnb0z7bvn4GOoRveYeE"
 }
 
 variable "s3_bucket" {

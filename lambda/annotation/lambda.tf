@@ -8,6 +8,26 @@ variable "s3_bucket" {
   type        = string
 }
 
+variable "google_api_key" {
+  description = "Google API key for the Lambda function"
+  type        = string
+}
+
+variable "db_host" {
+  description = "Database host for the Lambda function"
+  type        = string
+}
+
+variable "db_user" {
+  description = "Database user for the Lambda function"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Database password for the Lambda function"
+  type        = string
+}
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = "${path.module}"
@@ -29,7 +49,11 @@ resource "aws_lambda_function" "annotation" {
 
   environment {
     variables = {
-      # 可设置API KEY等
+      GOOGLE_API_KEY = var.google_api_key
+      DB_HOST       = var.db_host
+      DB_USER       = var.db_user
+      DB_PASSWORD   = var.db_password
+      DB_NAME       = "image_caption_db"
     }
   }
 }

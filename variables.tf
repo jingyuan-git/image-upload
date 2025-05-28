@@ -34,6 +34,12 @@ variable "db_password" {
   default = "password123"
 }
 
+variable "google_api_key" {
+  description = "Google API key for Lambda annotation function"
+  type        = string
+  default = "AIzaSyBreDUikiNxFrH1Qnb0z7bvn4GOoRveYeE"
+}
+
 # variable "subnet_id" {
 #   description = "Subnet ID"
 #   type        = string
