@@ -31,3 +31,13 @@ output "web_target_group_arn" {
   description = "The ARN of the web target group"
   value       = aws_lb_target_group.web.arn
 }
+
+output "alb_dns_name" {
+  description = "The DNS name of the Application Load Balancer"
+  value       = aws_lb.this.dns_name
+}
+
+output "alb_zone_id" {
+  description = "The zone ID of the Application Load Balancer"
+  value       = aws_lb.this.zone_id
+}
