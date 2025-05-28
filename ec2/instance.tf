@@ -11,13 +11,13 @@ resource "local_file" "app_py" {
   })
 }
 
-resource "aws_s3_object" "templates" {
-  for_each = fileset("${path.module}/templates", "**/*") # 遍历 templates 文件夹中的所有文件
+# resource "aws_s3_object" "templates" {
+#   for_each = fileset("${path.module}/templates", "**/*") # 遍历 templates 文件夹中的所有文件
 
-  bucket = var.s3_bucket
-  key    = each.value                                   # S3 中的对象键
-  source = "${path.module}/templates/${each.value}"    # 本地文件路径
-}
+#   bucket = var.s3_bucket
+#   key    = each.value                                   # S3 中的对象键
+#   source = "${path.module}/templates/${each.value}"    # 本地文件路径
+# }
 
 resource "aws_instance" "web" {
   ami                    = "ami-0953476d60561c955"
@@ -35,6 +35,7 @@ resource "aws_instance" "web" {
     db_user        = var.db_user
     db_password    = var.db_password
     app_code       = replace(local_file.app_py.content, "$", "\\$")
+    templates_dir  = fileset("${path.module}/templates", "**/*")
   })
 }
 
