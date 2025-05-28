@@ -30,11 +30,7 @@ echo "$(date): Flask application code written successfully"
 mkdir -p /home/ec2-user/templates
 
 # 将 templates 文件夹中的文件写入到 EC2 实例
-%{ for file in templates_dir ~}
-cat <<EOF > /home/ec2-user/templates/${file}
-${file("${path.module}/templates/${file}")}
-EOF
-%{ endfor ~}
+${templates_dir}
 
 # 设置环境变量
 export GOOGLE_API_KEY="${google_api_key}"

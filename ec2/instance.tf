@@ -35,7 +35,10 @@ resource "aws_instance" "web" {
     db_user        = var.db_user
     db_password    = var.db_password
     app_code       = replace(local_file.app_py.content, "$", "\\$")
-    templates_dir  = fileset("${path.module}/templates", "**/*")
+    templates_dir  = join("\n", [
+      for file in fileset("${path.module}/templates", "**/*") :
+      "cat <<EOF > /home/ec2-user/templates/${file}\n${file("${path.module}/templates/${file}")}\nEOF"
+    ])
   })
 }
 
