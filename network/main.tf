@@ -67,7 +67,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 
 resource "aws_security_group" "web_sg" {
   name        = "web-sg"
-  description = "Allow SSH and HTTP"
+  description = "Allow SSH, RDS and HTTP"
   vpc_id      = var.work_vpc_id
 
   ingress {
@@ -82,6 +82,13 @@ resource "aws_security_group" "web_sg" {
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_sg.id]
   }
 
   egress {

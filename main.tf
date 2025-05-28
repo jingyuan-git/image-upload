@@ -41,7 +41,7 @@ module "ec2" {
   iam_instance_profile = "Work-Role"
   # google_api_key = var.google_api_key
   s3_bucket      = module.s3_bucket.bucket_name
-  db_host        = module.rds.rds_endpoint
+  db_host        = regex("(.*):\\d+$", module.rds.rds_endpoint)[0]
   db_user        = var.db_user
   db_password    = var.db_password
 }

@@ -26,3 +26,8 @@ output "nat_gateway_id" {
   description = "The ID of the NAT Gateway"
   value       = aws_nat_gateway.nat.id
 }
+
+output "web_target_group_arn" {
+  description = "The ARN of the web target group"
+  value       = aws_lb_target_group.web.arn
+}

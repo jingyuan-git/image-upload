@@ -1,3 +1,24 @@
+resource "local_file" "app_py" {
+  filename = "${path.module}/app.py"
+  content  = templatefile("${path.module}/app.py.tpl", {
+    google_api_key = var.google_api_key,
+    s3_bucket      = module.s3_bucket.bucket_name,
+    s3_region      = "us-east-1",
+    db_host        = module.rds.rds_endpoint,
+    db_name        = "image_caption_db",
+    db_user        = var.db_user,
+    db_password    = var.db_password
+  })
+}
+
+resource "aws_s3_object" "templates" {
+  for_each = fileset("${path.module}/templates", "**/*") # 遍历 templates 文件夹中的所有文件
+
+  bucket = var.s3_bucket
+  key    = each.value                                   # S3 中的对象键
+  source = "${path.module}/templates/${each.value}"    # 本地文件路径
+}
+
 resource "aws_instance" "web" {
   ami                    = "ami-0953476d60561c955"
   instance_type          = var.instance_type
@@ -15,4 +36,10 @@ resource "aws_instance" "web" {
     db_password    = var.db_password
     app_code       = replace(file("${path.module}/app.py"), "$", "\\$")
   })
+}
+
+resource "aws_lb_target_group_attachment" "web" {
+  target_group_arn = module.alb_target_group.web_target_group_arn
+  target_id        = aws_instance.web.id
+  port             = 80
 }
