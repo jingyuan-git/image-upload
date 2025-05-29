@@ -99,8 +99,7 @@ resource "aws_lambda_function" "annotation" {
   handler          = "main.lambda_handler"
   runtime          = "python3.12"
   role             = data.aws_iam_role.existing_lambda_role.arn
-  filename         = data.local_file.lambda_zip.filename
-  source_code_hash = data.local_file.lambda_zip.content_base64sha256
+  filename         = "${path.module}/lambda_function.zip"
   timeout          = 60
   memory_size      = 512
 
