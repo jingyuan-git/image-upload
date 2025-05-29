@@ -57,14 +57,27 @@ data "aws_iam_role" "existing_lambda_role" {
 #   }
 # }
 
+resource "aws_s3_object" "lambda_zip" {
+  bucket = var.s3_bucket
+  key    = "lambda/lambda_function.zip"
+  source = "${path.module}/lambda_function.zip"
+  etag   = filemd5("${path.module}/lambda_function.zip")
+}
+
+# 从 S3 部署 Lambda
 resource "aws_lambda_function" "annotation" {
-  function_name    = "annotation-function"
-  handler          = "main.lambda_handler"
-  runtime          = "python3.12"
-  role             = data.aws_iam_role.existing_lambda_role.arn
-  filename         = "${path.module}/lambda_function.zip"  # 直接指向已有的 zip 文件
-  source_code_hash = filebase64sha256("${path.module}/lambda_function.zip")  # 使用文件的哈希值
-  timeout          = 30
+  function_name = "annotation-function"
+  handler       = "main.lambda_handler"
+  runtime       = "python3.12"
+  role          = data.aws_iam_role.existing_lambda_role.arn
+  
+  # 使用 S3 上传
+  s3_bucket     = var.s3_bucket
+  s3_key        = aws_s3_object.lambda_zip.key
+  source_code_hash = filebase64sha256("${path.module}/lambda_function.zip")
+  
+  timeout = 60  # 增加超时时间
+  memory_size = 512
 
   environment {
     variables = {
@@ -75,8 +88,9 @@ resource "aws_lambda_function" "annotation" {
       DB_NAME       = "image_caption_db"
     }
   }
-}
 
+  depends_on = [aws_s3_object.lambda_zip]
+}
 resource "aws_lambda_permission" "allow_s3" {
   statement_id  = "AllowExecutionFromS3"
   action        = "lambda:InvokeFunction"
