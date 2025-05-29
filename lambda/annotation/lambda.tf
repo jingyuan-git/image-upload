@@ -32,76 +32,19 @@ data "aws_iam_role" "existing_lambda_role" {
   name = "LabRole" # 替换为已有角色的名称
 }
 
-# data "archive_file" "lambda_zip" {
-#   type        = "zip"
-#   source_dir  = "${path.module}"
-#   output_path = "${path.module}/lambda.zip"
-# }
-# resource "aws_lambda_function" "annotation" {
-#   function_name    = "annotation-function"
-#   handler          = "main.lambda_handler"
-#   runtime          = "python3.12"
-#   role             = data.aws_iam_role.existing_lambda_role.arn
-#   filename         = data.archive_file.lambda_zip.output_path
-#   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-#   timeout          = 30
-
-#   environment {
-#     variables = {
-#       GOOGLE_API_KEY = var.google_api_key
-#       DB_HOST       = var.db_host
-#       DB_USER       = var.db_user
-#       DB_PASSWORD   = var.db_password
-#       DB_NAME       = "image_caption_db"
-#     }
-#   }
-# }
-
-# 使用 null_resource 运行 Docker 构建和打包
-resource "null_resource" "lambda_package" {
-  triggers = {
-    dockerfile_hash = filemd5("${path.module}/Dockerfile")
-    main_py_hash    = filemd5("${path.module}/main.py")
-    requirements_hash = filemd5("${path.module}/requirements.txt")
-    timestamp = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      cd ${path.module}
-      
-      # 构建 Docker 镜像
-      docker build -t lambda-builder .
-      
-      # 创建临时目录
-      rm -rf ./temp_build
-      mkdir -p ./temp_build
-      
-      # 运行容器并复制文件到临时目录
-      docker run --rm -v $(pwd)/temp_build:/out lambda-builder
-      
-      # 创建 zip 包
-      cd ./temp_build
-      zip -r ../lambda_function.zip .
-      
-      # 清理临时目录
-      cd ..
-      rm -rf ./temp_build
-    EOT
-    
-    working_dir = path.module
-  }
+data "archive_file" "lambda_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}"
+  output_path = "${path.module}/lambda.zip"
 }
-
-# Lambda 函数
 resource "aws_lambda_function" "annotation" {
   function_name    = "annotation-function"
   handler          = "main.lambda_handler"
   runtime          = "python3.12"
   role             = data.aws_iam_role.existing_lambda_role.arn
-  filename         = "${path.module}/lambda_function.zip"
-  timeout          = 60
-  memory_size      = 512
+  filename         = data.archive_file.lambda_zip.output_path
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  timeout          = 30
 
   environment {
     variables = {
@@ -112,9 +55,66 @@ resource "aws_lambda_function" "annotation" {
       DB_NAME       = "image_caption_db"
     }
   }
-
-  depends_on = [null_resource.lambda_package]
 }
+
+# # 使用 null_resource 运行 Docker 构建和打包
+# resource "null_resource" "lambda_package" {
+#   triggers = {
+#     dockerfile_hash = filemd5("${path.module}/Dockerfile")
+#     main_py_hash    = filemd5("${path.module}/main.py")
+#     requirements_hash = filemd5("${path.module}/requirements.txt")
+#     timestamp = timestamp()
+#   }
+
+#   provisioner "local-exec" {
+#     command = <<-EOT
+#       cd ${path.module}
+      
+#       # 构建 Docker 镜像
+#       docker build -t lambda-builder .
+      
+#       # 创建临时目录
+#       rm -rf ./temp_build
+#       mkdir -p ./temp_build
+      
+#       # 运行容器并复制文件到临时目录
+#       docker run --rm -v $(pwd)/temp_build:/out lambda-builder
+      
+#       # 创建 zip 包
+#       cd ./temp_build
+#       zip -r ../lambda_function.zip .
+      
+#       # 清理临时目录
+#       cd ..
+#       rm -rf ./temp_build
+#     EOT
+    
+#     working_dir = path.module
+#   }
+# }
+
+# # Lambda 函数
+# resource "aws_lambda_function" "annotation" {
+#   function_name    = "annotation-function"
+#   handler          = "main.lambda_handler"
+#   runtime          = "python3.12"
+#   role             = data.aws_iam_role.existing_lambda_role.arn
+#   filename         = "${path.module}/lambda_function.zip"
+#   timeout          = 60
+#   memory_size      = 512
+
+#   environment {
+#     variables = {
+#       GOOGLE_API_KEY = var.google_api_key
+#       DB_HOST       = var.db_host
+#       DB_USER       = var.db_user
+#       DB_PASSWORD   = var.db_password
+#       DB_NAME       = "image_caption_db"
+#     }
+#   }
+
+#   depends_on = [null_resource.lambda_package]
+# }
 
 resource "aws_lambda_permission" "allow_s3" {
   statement_id  = "AllowExecutionFromS3"
