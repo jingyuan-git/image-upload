@@ -1,3 +1,2 @@
-boto3
-mysql-connector-python
-google-generativeai
+mysql-connector-python==8.2.0
+requests==2.31.0
