@@ -57,27 +57,52 @@ data "aws_iam_role" "existing_lambda_role" {
 #   }
 # }
 
-resource "aws_s3_object" "lambda_zip" {
-  bucket = var.s3_bucket
-  key    = "lambda/lambda_function.zip"
-  source = "${path.module}/lambda_function.zip"
-  etag   = filemd5("${path.module}/lambda_function.zip")
+# 使用 null_resource 运行 Docker 构建和打包
+resource "null_resource" "lambda_package" {
+  triggers = {
+    dockerfile_hash = filemd5("${path.module}/Dockerfile")
+    main_py_hash    = filemd5("${path.module}/main.py")
+    requirements_hash = filemd5("${path.module}/requirements.txt")
+    timestamp = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      cd ${path.module}
+      
+      # 构建 Docker 镜像
+      docker build -t lambda-builder .
+      
+      # 创建临时目录
+      rm -rf ./temp_build
+      mkdir -p ./temp_build
+      
+      # 运行容器并复制文件到临时目录
+      docker run --rm -v $(pwd)/temp_build:/out lambda-builder
+      
+      # 创建 zip 包
+      cd ./temp_build
+      zip -r ../lambda_function.zip .
+      
+      # 清理临时目录
+      cd ..
+      rm -rf ./temp_build
+    EOT
+    
+    working_dir = path.module
+  }
 }
 
-# 从 S3 部署 Lambda
+# Lambda 函数
 resource "aws_lambda_function" "annotation" {
-  function_name = "annotation-function"
-  handler       = "main.lambda_handler"
-  runtime       = "python3.12"
-  role          = data.aws_iam_role.existing_lambda_role.arn
-  
-  # 使用 S3 上传
-  s3_bucket     = var.s3_bucket
-  s3_key        = aws_s3_object.lambda_zip.key
+  function_name    = "annotation-function"
+  handler          = "main.lambda_handler"
+  runtime          = "python3.12"
+  role             = data.aws_iam_role.existing_lambda_role.arn
+  filename         = "${path.module}/lambda_function.zip"
   source_code_hash = filebase64sha256("${path.module}/lambda_function.zip")
-  
-  timeout = 60  # 增加超时时间
-  memory_size = 512
+  timeout          = 60
+  memory_size      = 512
 
   environment {
     variables = {
@@ -89,8 +114,9 @@ resource "aws_lambda_function" "annotation" {
     }
   }
 
-  depends_on = [aws_s3_object.lambda_zip]
+  depends_on = [null_resource.lambda_package]
 }
+
 resource "aws_lambda_permission" "allow_s3" {
   statement_id  = "AllowExecutionFromS3"
   action        = "lambda:InvokeFunction"

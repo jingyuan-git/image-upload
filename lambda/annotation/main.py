@@ -1,28 +1,19 @@
 import json
 import base64
-import boto3
 import mysql.connector
-import google.generativeai as genai
+import requests
 from datetime import datetime
 import os
 
-# 配置 Gemini API
+# 配置
 GOOGLE_API_KEY = os.environ['GOOGLE_API_KEY']
-genai.configure(api_key=GOOGLE_API_KEY)
-
-# 配置数据库连接
 DB_HOST = os.environ['DB_HOST']
 DB_USER = os.environ['DB_USER']
 DB_PASSWORD = os.environ['DB_PASSWORD']
 DB_NAME = os.environ['DB_NAME']
 
-# 选择 Gemini 模型
-model = genai.GenerativeModel(model_name="gemini-2.0-pro-exp-02-05")
-
 def get_db_connection():
-    """
-    建立 MySQL RDS 数据库连接
-    """
+    """建立 MySQL RDS 数据库连接"""
     try:
         connection = mysql.connector.connect(
             host=DB_HOST,
@@ -37,23 +28,49 @@ def get_db_connection():
         return None
 
 def generate_image_caption(image_data):
-    """
-    使用 Gemini API 生成图像标题
-    """
+    """使用 Gemini REST API 生成图像标题"""
     try:
+        # 准备请求数据
         encoded_image = base64.b64encode(image_data).decode("utf-8")
-        response = model.generate_content([
-            {"mime_type": "image/jpeg", "data": encoded_image},
-            "Caption this image.",
-        ])
-        return response.text if response.text else "No caption generated."
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro-exp-02-05:generateContent?key={GOOGLE_API_KEY}"
+        
+        payload = {
+            "contents": [{
+                "parts": [
+                    {
+                        "text": "Caption this image."
+                    },
+                    {
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": encoded_image
+                        }
+                    }
+                ]
+            }]
+        }
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(url, json=payload, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if 'candidates' in result and len(result['candidates']) > 0:
+                return result['candidates'][0]['content']['parts'][0]['text']
+            else:
+                return "No caption generated."
+        else:
+            return f"API Error: {response.status_code} - {response.text}"
+            
     except Exception as e:
         return f"Error: {str(e)}"
 
 def save_caption_to_db(image_key, caption):
-    """
-    将图像标题保存到数据库
-    """
+    """将图像标题保存到数据库"""
     connection = get_db_connection()
     if connection is None:
         return False, "Failed to connect to database"
@@ -74,9 +91,7 @@ def save_caption_to_db(image_key, caption):
         return False, f"Database error: {str(e)}"
 
 def lambda_handler(event, context):
-    """
-    Lambda 主处理函数
-    """
+    """Lambda 主处理函数"""
     try:
         # 解析事件数据
         body = json.loads(event.get('body', '{}'))
