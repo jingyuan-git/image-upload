@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename  # Secure filename handling
 import google.generativeai as genai  # Gemini API for image captioning
 import base64  # Encoding image data for API processing
 from io import BytesIO  # Handling in-memory file objects
+import json
 
 # Configure Gemini API, REPLACE with your Gemini API key
 GOOGLE_API_KEY = "${google_api_key}"
@@ -38,6 +39,51 @@ def generate_image_caption(image_data):
         return response.text if response.text else "No caption generated."
     except Exception as e:
         return f"Error: {str(e)}"
+
+lambda_client = boto3.client('lambda', region_name='us-east-1')
+
+def generate_image_caption_via_lambda(image_data, image_key):
+    """
+    通过 Lambda 函数生成图像标题
+    """
+    try:
+        print("Preparing payload for Lambda function...")
+        # 准备 Lambda 调用的 payload
+        payload = {
+            'body': json.dumps({
+                'image_data': base64.b64encode(image_data).decode('utf-8'),
+                'image_key': image_key
+            })
+        }
+        
+        print(f"Invoking Lambda function 'image-caption-generator' with image_key: {image_key}")
+        # 调用 Lambda 函数
+        response = lambda_client.invoke(
+            FunctionName='image-caption-generator',
+            InvocationType='RequestResponse',
+            Payload=json.dumps(payload)
+        )
+        
+        print("Lambda function invoked successfully. Parsing response...")
+        # 解析响应
+        response_payload = json.loads(response['Payload'].read())
+        print(f"Lambda response payload: {response_payload}")
+        
+        if response_payload.get('statusCode') == 200:
+            body = json.loads(response_payload['body'])
+            caption = body.get('caption', 'No caption generated')
+            print(f"Caption generated successfully: {caption}")
+            return caption
+        else:
+            body = json.loads(response_payload['body'])
+            error_message = body.get('error', 'Unknown error')
+            print(f"Error from Lambda function: {error_message}")
+            return f"Error: {error_message}"
+    
+    except Exception as e:
+        print(f"Lambda invocation error: {str(e)}")
+        return f"Lambda invocation error: {str(e)}"
+
 
 # Flask app setup
 app = Flask(__name__)
@@ -117,22 +163,7 @@ def upload_image():
             return render_template("upload.html", error=f"S3 Upload Error: {str(e)}")
 
         # Generate caption
-        caption = generate_image_caption(file_data)
-
-        # Save metadata to the database
-        try:
-            connection = get_db_connection()
-            if connection is None:
-                return render_template("upload.html", error="Database Error: Unable to connect to the database.")
-            cursor = connection.cursor()
-            cursor.execute(
-                "INSERT INTO captions (image_key, caption) VALUES (%s, %s)",
-                (filename, caption),
-            )
-            connection.commit()
-            connection.close()
-        except Exception as e:
-            return render_template("upload.html", error=f"Database Error: {str(e)}")
+        caption = generate_image_caption_via_lambda(file_data, filename)
 
         # Prepare image for frontend display using Base64 encoding
         encoded_image = base64.b64encode(file_data).decode("utf-8")

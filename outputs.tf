@@ -17,3 +17,8 @@ output "load_balancer_url" {
   description = "The complete URL of the Application Load Balancer"
   value       = "http://${module.network.alb_dns_name}"
 }
+
+output "bucket_name" {
+  description = "The name of the S3 bucket"
+  value       = module.s3_bucket.bucket_name
+}
