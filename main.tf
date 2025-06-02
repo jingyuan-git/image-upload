@@ -76,7 +76,7 @@ resource "aws_s3_bucket_notification" "image_upload_notification" {
   lambda_function {
     lambda_function_arn = module.lambda_annotation.lambda_arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "thumbnail/"
+    filter_prefix       = "thumbnails/"
   }
 
   lambda_function {
