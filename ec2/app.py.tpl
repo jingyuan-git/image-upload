@@ -13,6 +13,7 @@ import google.generativeai as genai  # Gemini API for image captioning
 import base64  # Encoding image data for API processing
 from io import BytesIO  # Handling in-memory file objects
 import json
+import time
 
 # Configure Gemini API, REPLACE with your Gemini API key
 GOOGLE_API_KEY = "${google_api_key}"
@@ -162,14 +163,43 @@ def upload_image():
         except Exception as e:
             return render_template("upload.html", error=f"S3 Upload Error: {str(e)}")
 
-        # Generate caption
-        caption = generate_image_caption_via_lambda(file_data, filename)
+        caption = "Caption processing pending..."
+        connection = get_db_connection()
+        if connection:
+            try:
+                cursor = connection.cursor()
+                query = "SELECT caption FROM captions WHERE image_key = %s"
+                timeout = 15  # Maximum wait time in seconds
+                start_time = time.time()
+
+                while True:
+                    cursor.execute(query, (filename,))
+                    row = cursor.fetchone()
+                    if row is not None:
+                        caption = row[0]
+                        print(f"Caption found: {caption}")
+                        break  # Exit the loop if caption is found
+
+                    # Check if timeout has been reached
+                    if time.time() - start_time > timeout:
+                        print("Timeout reached while waiting for caption.")
+                        caption = "Caption processing timed out. Please check back later."
+                        break
+
+                    print("Caption not found yet. Retrying in 1 second...")
+                    time.sleep(1)  # Wait for 1 second before retrying
+
+                connection.close()
+            except Exception as e:
+                caption = f"Error querying caption: {str(e)}"
+                print("Error querying caption:", str(e))
+        else:
+            caption = "Database Error: Unable to connect to the database."
+            print("Failed to establish database connection.")
 
         # Prepare image for frontend display using Base64 encoding
         encoded_image = base64.b64encode(file_data).decode("utf-8")
-        file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{filename}"
-
-        thumbnail_key = generate_thumbnail_via_lambda(filename)
+        file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/images/{filename}"
         
         return render_template("upload.html", image_data=encoded_image, file_url=file_url, caption=caption)
 
@@ -235,7 +265,7 @@ def gallery():
             {
                 "url": get_s3_client().generate_presigned_url(
                     "get_object",
-                    Params={"Bucket": S3_BUCKET, "Key": f"thumbnails/{row['image_key']}"},
+                    Params={"Bucket": S3_BUCKET, "Key": f"{row['image_key']}"},
                     ExpiresIn=3600,  # URL expires in 1 hour
                 ),
                 "caption": row["caption"],
