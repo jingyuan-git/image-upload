@@ -1,5 +1,20 @@
+variable "s3_bucket_arn" {
+  description = "S3 bucket ARN"
+  type        = string
+}
+
 variable "s3_bucket" {
   description = "S3 bucket name"
+  type        = string
+}
+
+variable "lambda_subnet_ids" {
+  description = "List of subnet IDs for Lambda function VPC configuration"
+  type        = list(string)
+}
+
+variable "lambda_security_group_id" {
+  description = "Security group ID for Lambda function VPC configuration"
   type        = string
 }
 
@@ -9,36 +24,28 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/thumbnail_lambda.zip"
 }
 
-resource "aws_iam_role" "lambda_exec" {
-  name = "lambda_thumbnail_exec_role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = { Service = "lambda.amazonaws.com" }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_s3_access" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+data "aws_iam_role" "existing_lambda_role" {
+  name = "LabRole" # 替换为已有角色的名称
 }
 
 resource "aws_lambda_function" "thumbnail" {
   function_name    = "thumbnail-generator"
   handler          = "main.lambda_handler"
   runtime          = "python3.12"
-  role             = aws_iam_role.lambda_exec.arn
+  role             = data.aws_iam_role.existing_lambda_role.arn
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  timeout          = 30
+  timeout          = 60
 
   environment {
     variables = {
       # 可根据需要添加环境变量
     }
+  }
+
+  vpc_config {
+    subnet_ids         = var.lambda_subnet_ids         # 子网 ID 列表
+    security_group_ids = [var.lambda_security_group_id] # Lambda 的安全组 ID
   }
 }
 
@@ -47,7 +54,7 @@ resource "aws_lambda_permission" "allow_s3" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.thumbnail.function_name
   principal     = "s3.amazonaws.com"
-  # source_arn 可以在主模块里用
+  source_arn    = var.s3_bucket_arn
 }
 
 output "lambda_arn" {

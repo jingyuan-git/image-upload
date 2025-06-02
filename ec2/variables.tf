@@ -22,3 +22,34 @@ variable "iam_instance_profile" {
   description = "IAM instance profile name"
   type        = string
 }
+
+
+variable "google_api_key" {
+  description = "Gemini API Key"
+  type        = string
+}
+
+variable "s3_bucket" {
+  description = "S3 bucket name"
+  type        = string
+}
+
+variable "db_host" {
+  description = "RDS endpoint"
+  type        = string
+}
+
+variable "db_user" {
+  description = "RDS username"
+  type        = string
+}
+
+variable "db_password" {
+  description = "RDS password"
+  type        = string
+}
+
+variable "target_group_arn" {
+  description = "Target group ARN for the EC2 instance"
+  type        = string
+}
