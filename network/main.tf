@@ -165,6 +165,40 @@ resource "aws_eip" "nat" {
   }
 }
 
+resource "aws_eip" "nat_az2" {
+  domain = "vpc"
+  tags = {
+    Name = "NAT Gateway EIP AZ2"
+  }
+}
+
+
+resource "aws_nat_gateway" "nat_az2" {
+  allocation_id = aws_eip.nat_az2.id
+  subnet_id     = aws_subnet.public_subnet_az2.id  # Public subnet in AZ2
+  tags = {
+    Name = "NAT Gateway AZ2"
+  }
+}
+
+resource "aws_route_table" "private_route_table_az2" {
+  vpc_id = var.work_vpc_id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_az2.id
+  }
+
+  tags = {
+    Name = "Private Route Table AZ2"
+  }
+}
+
+resource "aws_route_table_association" "private_subnet_association_az2" {
+  subnet_id      = aws_subnet.private_subnet_web2.id  # Private subnet in AZ2
+  route_table_id = aws_route_table.private_route_table_az2.id
+}
+
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
   subnet_id     = data.aws_subnet.work_public_subnet.id
