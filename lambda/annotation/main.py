@@ -58,9 +58,10 @@ def save_caption_to_db(image_key, caption):
         connection.close()
         return False, f"Database error: {str(e)}"
 
-# 生成 Caption
 def generate_image_caption(image_data):
     try:
+        start_time = time.time()
+        print("Encoding image data...")
         encoded_image = base64.b64encode(image_data).decode("utf-8")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GOOGLE_API_KEY}"
 
@@ -85,34 +86,43 @@ def generate_image_caption(image_data):
             headers={"Content-Type": "application/json"}
         )
 
+        print("Sending request to Google Gemini API...")
         with urllib.request.urlopen(req, timeout=10) as response:
             if response.status == 200:
                 result = json.loads(response.read().decode('utf-8'))
+                print(f"API call completed in {time.time() - start_time:.2f} seconds.")
                 if 'candidates' in result and result['candidates']:
                     return result['candidates'][0]['content']['parts'][0]['text']
                 else:
                     return "No caption generated."
             else:
                 error_text = response.read().decode('utf-8')
+                print(f"API Error: {response.status} - {error_text}")
                 return f"API Error: {response.status} - {error_text}"
     except Exception as e:
+        print(f"Error in generate_image_caption: {str(e)}")
         return f"Error: {str(e)}"
 
 # 处理 S3 事件记录
 def process_s3_record(record):
     try:
+        print("Processing S3 record...")
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        print(f"Processing S3 object: {key} from bucket: {bucket}")
+        print(f"Bucket: {bucket}, Key: {key}")
 
         s3_client = boto3.client('s3')
+        print("Fetching object from S3...")
         response = s3_client.get_object(Bucket=bucket, Key=key)
         image_data = response['Body'].read()
+        print("Object fetched successfully.")
 
+        print("Generating caption...")
         caption = generate_image_caption(image_data)
-        success, message = save_caption_to_db(key, caption)
+        print(f"Caption generated: {caption}")
 
-        print(f"Caption for {key}: {caption}")
+        print("Saving caption to database...")
+        success, message = save_caption_to_db(key, caption)
         print(f"Database save result: {message}")
 
         return {'image_key': key, 'caption': caption, 'success': success, 'message': message}

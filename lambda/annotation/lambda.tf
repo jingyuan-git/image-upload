@@ -54,7 +54,7 @@ resource "aws_lambda_function" "annotation" {
   role             = data.aws_iam_role.existing_lambda_role.arn
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  timeout          = 60
+  timeout          = 120
 
   environment {
     variables = {

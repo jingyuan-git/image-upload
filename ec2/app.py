@@ -182,18 +182,38 @@ def upload_image():
         except Exception as e:
             return render_template("upload.html", error=f"S3 Upload Error: {str(e)}")
 
+        # Query the database for the caption using image_key,
+        # assuming that the Lambda function (triggered by the S3 event) writes it into the DB.
         caption = "Caption processing pending..."
         connection = get_db_connection()
         if connection:
             try:
+                print("Database connection established.")
                 cursor = connection.cursor()
+
+                # Debug: Print all rows in the captions table
+                print("Fetching all rows from the captions table for debugging...")
+                cursor.execute("SELECT image_key, caption FROM captions")
+                all_rows = cursor.fetchall()
+                print("Current rows in the database:")
+                for row in all_rows:
+                    print(f"image_key: {row[0]}, caption: {row[1]}")
+
+                # Query for the specific image_key
+                print(f"Querying caption for image_key: {filename}")
                 query = "SELECT caption FROM captions WHERE image_key = %s"
                 timeout = 15  # Maximum wait time in seconds
                 start_time = time.time()
 
                 while True:
-                    cursor.execute(query, (filename,))
+                    cursor.execute(query, (f"thumbnails/{filename}",))
                     row = cursor.fetchone()
+
+                    all_rows = cursor.fetchall()
+                    print("Current rows in the database:")
+                    for row in all_rows:
+                        print(f"image_key: {row[0]}")
+
                     if row is not None:
                         caption = row[0]
                         print(f"Caption found: {caption}")
@@ -209,6 +229,7 @@ def upload_image():
                     time.sleep(1)  # Wait for 1 second before retrying
 
                 connection.close()
+                print("Database connection closed.")
             except Exception as e:
                 caption = f"Error querying caption: {str(e)}"
                 print("Error querying caption:", str(e))
@@ -219,6 +240,8 @@ def upload_image():
         # Prepare image for frontend display using Base64 encoding
         encoded_image = base64.b64encode(file_data).decode("utf-8")
         file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/images/{filename}"
+
+        print("file_url:", file_url, "caption:", caption)
         
         return render_template("upload.html", image_data=encoded_image, file_url=file_url, caption=caption)
 
