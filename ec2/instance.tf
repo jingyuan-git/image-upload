@@ -47,7 +47,8 @@ resource "aws_launch_template" "web" {
     security_groups             = var.vpc_security_group_ids
   }
 
-  user_data = templatefile("${path.module}/user_data.sh", {
+  # Base64-encode the user_data
+  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
     google_api_key = var.google_api_key
     s3_bucket      = var.s3_bucket
     db_host        = var.db_host
@@ -58,7 +59,7 @@ resource "aws_launch_template" "web" {
       for file in fileset("${path.module}/templates", "**/*") :
       "cat <<EOF > /home/ec2-user/templates/${file}\n${file("${path.module}/templates/${file}")}\nEOF"
     ])
-  })
+  }))
 
   tag_specifications {
     resource_type = "instance"
