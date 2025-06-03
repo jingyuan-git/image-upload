@@ -79,7 +79,7 @@ resource "aws_autoscaling_group" "web" {
   desired_capacity = 1
   vpc_zone_identifier = var.subnet_ids # Replace with a list of subnets for multiple AZs
 
-  target_group_arns = [aws_lb_target_group.web.arn]
+  target_group_arns = [var.target_group_arn]
 
   tag {
     key                 = "Name"
@@ -111,8 +111,8 @@ resource "aws_autoscaling_group" "web" {
 #   })
 # }
 
-resource "aws_lb_target_group_attachment" "web" {
-  target_group_arn = var.target_group_arn
-  target_id        = aws_instance.web.id
-  port             = 80
-}
+# resource "aws_lb_target_group_attachment" "web" {
+#   target_group_arn = var.target_group_arn
+#   target_id        = aws_instance.web.id
+#   port             = 80
+# }
