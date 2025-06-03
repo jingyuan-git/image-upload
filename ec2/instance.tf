@@ -46,8 +46,6 @@ resource "aws_autoscaling_policy" "target_tracking_cpu" {
 
     target_value = 25.0  # Target value for Average CPU utilization
   }
-
-  estimated_instance_warmup = 60  # Instance warmup time in seconds
 }
 
 resource "aws_launch_template" "web" {
@@ -96,6 +94,8 @@ resource "aws_autoscaling_group" "web" {
   vpc_zone_identifier = var.subnet_ids # Replace with a list of subnets for multiple AZs
 
   target_group_arns = [var.target_group_arn]
+
+  default_instance_warmup = 60
 
   tag {
     key                 = "Name"
