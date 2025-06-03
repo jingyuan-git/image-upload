@@ -14,6 +14,10 @@ import base64  # Encoding image data for API processing
 from io import BytesIO  # Handling in-memory file objects
 import json
 import time
+from datetime import datetime
+
+def log_with_timestamp(message):
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
 
 # Configure Gemini API, REPLACE with your Gemini API key
 GOOGLE_API_KEY = "${google_api_key}"
@@ -206,22 +210,29 @@ def upload_image():
                 start_time = time.time()
 
                 while True:
-                    cursor.execute(query, (f"thumbnails/{filename}",))
+                    connection1 = get_db_connection()
+                    cursor = connection1.cursor()
+                    query = f"SELECT caption FROM captions WHERE image_key = 'thumbnails/{filename}'"
+                    log_with_timestamp(f"Executing query: {query}")
+                    cursor.execute(query)
+
                     row = cursor.fetchone()
 
                     if row is not None:
-                        caption = row[1]
-                        print(f"Caption found: {caption}")
+                        caption = row[0]
+                        log_with_timestamp(f"Caption found: {caption}")
+                        connection1.close()
                         break  # Exit the loop if caption is found
 
                     # Check if timeout has been reached
                     if time.time() - start_time > timeout:
-                        print("Timeout reached while waiting for caption.")
+                        log_with_timestamp("Timeout reached while waiting for caption.")
                         caption = "Caption processing timed out. Please check back later."
                         break
 
-                    print("Caption not found yet. Retrying in 1 second...")
+                    log_with_timestamp("Caption not found yet. Retrying in 1 second...")
                     time.sleep(1)  # Wait for 1 second before retrying
+                    connection1.close()
 
                 connection.close()
                 print("Database connection closed.")
