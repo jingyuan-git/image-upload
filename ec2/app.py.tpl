@@ -12,20 +12,12 @@ from datetime import datetime
 def log_with_timestamp(message):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
 
-# Configure Gemini API, REPLACE with your Gemini API key
 GOOGLE_API_KEY = "${google_api_key}"
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# Choose a Gemini model for generating captions
 model = genai.GenerativeModel(model_name="gemini-2.0-pro-exp-02-05")
 
 def generate_image_caption(image_data):
-    """
-    Generate a caption for an uploaded image using the Gemini API.
-
-    :param image_data: Raw binary image data
-    :return: Generated caption or error message
-    """
     try:
         encoded_image = base64.b64encode(image_data).decode("utf-8")
         response = model.generate_content(
@@ -51,7 +43,6 @@ def generate_image_caption_via_lambda(image_data, image_key):
         }
         
         print(f"Invoking Lambda function 'annotation-function' with image_key: {image_key}")
-        # 调用 Lambda 函数
         response = lambda_client.invoke(
             FunctionName='annotation-function',
             InvocationType='RequestResponse',
@@ -97,11 +88,6 @@ DB_USER = "${db_user}"
 DB_PASSWORD = "${db_password}"
 
 def get_db_connection():
-    """
-    Establishes a connection to the MySQL RDS database.
-
-    :return: Database connection object or None if connection fails
-    """
     try:
         connection = mysql.connector.connect(
             host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD
@@ -119,7 +105,6 @@ def allowed_file(filename):
 
 @app.route("/")
 def upload_form():
-    """Render the homepage with the file upload form."""
     return render_template("index.html")
 
 @app.route("/upload", methods=["GET", "POST"])
