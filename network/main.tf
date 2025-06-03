@@ -220,6 +220,30 @@ resource "aws_route_table" "private_route_table" {
   }
 }
 
+data "aws_internet_gateway" "work_igw" {
+  filter {
+    name   = "attachment.vpc-id"
+    values = [var.work_vpc_id]
+  }
+
+  tags = {
+    Name = "Work IGW"
+  }
+}
+
+resource "aws_route_table" "public_route_table_az2" {
+  vpc_id = var.work_vpc_id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = data.aws_internet_gateway.work_igw.id
+  }
+
+  tags = {
+    Name = "Public Route Table AZ2"
+  }
+}
+
 resource "aws_route_table_association" "private_subnet_association" {
   subnet_id      = aws_subnet.private_subnet_web.id
   route_table_id = aws_route_table.private_route_table.id
