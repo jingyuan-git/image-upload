@@ -37,6 +37,7 @@ module "ec2" {
   instance_type         = var.instance_type
   key_name              = var.key_name
   subnet_id             = module.network.private_subnet_web_id
+  subnet_ids             = [module.network.private_subnet_web_id, module.network.private_subnet_web2_id]
   vpc_security_group_ids = [module.network.security_group_web_sg_id]
   iam_instance_profile = "Work-Role"
   google_api_key = var.google_api_key
