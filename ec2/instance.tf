@@ -35,6 +35,21 @@ resource "aws_autoscaling_policy" "scale_in" {
   autoscaling_group_name = aws_autoscaling_group.web.name
 }
 
+resource "aws_autoscaling_policy" "target_tracking_cpu" {
+  name                   = "target-tracking-cpu-policy"
+  autoscaling_group_name = aws_autoscaling_group.web.name
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+
+    target_value = 25.0  # Target value for Average CPU utilization
+  }
+
+  estimated_instance_warmup = 60  # Instance warmup time in seconds
+}
+
 resource "aws_launch_template" "web" {
   name_prefix   = "web-launch-template"
   image_id      = "ami-0953476d60561c955" # Replace with your AMI ID
