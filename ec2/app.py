@@ -202,20 +202,15 @@ def upload_image():
                 # Query for the specific image_key
                 print(f"Querying caption for image_key: {filename}")
                 query = "SELECT caption FROM captions WHERE image_key = %s"
-                timeout = 15  # Maximum wait time in seconds
+                timeout = 60  # Maximum wait time in seconds
                 start_time = time.time()
 
                 while True:
                     cursor.execute(query, (f"thumbnails/{filename}",))
                     row = cursor.fetchone()
 
-                    all_rows = cursor.fetchall()
-                    print("Current rows in the database:")
-                    for row in all_rows:
-                        print(f"image_key: {row[0]}")
-
                     if row is not None:
-                        caption = row[0]
+                        caption = row[1]
                         print(f"Caption found: {caption}")
                         break  # Exit the loop if caption is found
 
