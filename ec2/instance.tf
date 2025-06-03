@@ -38,14 +38,16 @@ resource "aws_autoscaling_policy" "scale_in" {
 resource "aws_autoscaling_policy" "target_tracking_cpu" {
   name                   = "target-tracking-cpu-policy"
   autoscaling_group_name = aws_autoscaling_group.web.name
+  policy_type            = "TargetTrackingScaling"
 
   target_tracking_configuration {
     predefined_metric_specification {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
 
-    target_value = 25.0  # Target value for Average CPU utilization
+    target_value = 25.0
   }
+  estimated_instance_warmup  = 60
 }
 
 resource "aws_launch_template" "web" {
