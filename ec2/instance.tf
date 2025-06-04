@@ -55,11 +55,14 @@ resource "aws_launch_template" "web" {
   image_id      = "ami-0953476d60561c955" # Replace with your AMI ID
   instance_type = var.instance_type
   key_name      = var.key_name
-
   network_interfaces {
     associate_public_ip_address = true
     subnet_id                   = var.subnet_id
     security_groups             = var.vpc_security_group_ids
+  }
+
+  iam_instance_profile {
+    name = var.iam_instance_profile
   }
 
   # Base64-encode the user_data
