@@ -61,9 +61,9 @@ resource "aws_launch_template" "web" {
     security_groups             = var.vpc_security_group_ids
   }
 
-  iam_instance_profile {
-    name = var.iam_instance_profile
-  }
+  # iam_instance_profile {
+  #   name = var.iam_instance_profile
+  # }
 
   # Base64-encode the user_data
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
